@@ -1,0 +1,157 @@
+#!/bin/bash
+
+#PROGRAM:    CSCI 330 Assignment 5
+#PROGRAMMER: Margaret Higginbotham
+#LOGON ID:   z1793581
+#DUE DATE:   April 10, 2018
+#
+#FUNCTION:   Shell script that creates, views, and modifies a simple database that contains automobile records
+
+dbname=$1
+command=$2
+
+### new Command ###
+if [ "$command" == "new" ]; then
+
+  title_text=$3
+
+  #Makes sure database exists
+  if [ -f $dbname ]; then
+    echo -e "File already exists"
+    exit -1
+  fi
+
+  #Creates the database
+  touch $dbname
+
+  #New title text- Text given
+  if [ $# -lt 3 ]; then
+    echo "Automobile Database" > $dbname
+  else
+    echo "$title_text" >> $dbname
+  fi
+
+  #New title text- No text given
+    echo -e "New database created"
+
+fi
+
+### add Command ###
+if [ "$command" == "add" ]; then
+
+  make=$3
+  model=$4
+  year=$5
+  color=$6
+
+  #Make sure database is writable
+  if [ ! -w $dbname ]; then
+    echo -e "Not writable"
+    exit -1
+  fi
+
+  #All parameters present
+  if [ $# == 6 ]; then
+    echo "$make, $model, $year, $color" >> $dbname
+    echo -e "Sucessfully added a record to the database"
+
+fi
+
+### show Command ###
+if [ "$command" == "show" ]; then
+
+  #Make sure database is readable
+  if [ ! -r $dbname]; then
+    echo -e "Not readable"
+    exit -1
+  fi
+
+  #show all
+  if [ "$3" == "all" ]; then
+    cat $1
+
+  #show single number
+  elif ["$3" == "single"]; then
+
+    #Line number
+    line=$4
+
+    #Number of lines in database
+    total_lines=$(cat $dbname|wc -l)
+
+    #Output title
+    sed -n '1 p' $dbname
+
+    #Output line
+    sed -n ''$line' p' $dbname
+  fi
+
+  #show range number1 number2
+  elif [ "$3" == "range" ]; then
+
+    #Line range
+    first_line_num=$4
+    second_line_num=$5
+
+    #Number of lines in database
+    total_lines=$(cat $dbname|wc -l)
+
+    #Output title
+    sed -n '1 p' $dbname
+
+    #Output line range
+    sed -n ''$first_line_num','$second_line_num' p' $dbname
+
+fi
+
+### delete Command ###
+if [ "$command" == "delete" ]; then
+  total_lines=$(cat $dbname|wc -l)
+  new_lines=($total_lines -1)
+
+  #Make sure database is readable
+  if [ ! -r $dbname]; then
+    echo -e "Not readable"
+    exit -1
+  fi
+
+  #Make sure database is writable
+  if [ ! -w $dbname]; then
+    echo -e "Not writable"
+    exit -1
+  fi
+
+  #delete all
+  if [ "$3" == "all" ]; then
+    delete_all=$(sed -n '1 p' $dbname)
+    echo $delete_all > $dbname
+    echo -e "Sucessfully deleted all records from the database"
+
+  #delete single
+  elif [ "$3" == "single" ]; then
+
+    #Line number
+    line=$4
+
+    #delete and output
+    sed -i ''$line' d' $dbname
+    echo -e "Sucessfully deleted 1 record from the database"
+  fi
+
+  #delete range number1 number2
+  elif [ "$3" == "range" ]; then
+    #Line range
+    first_line_num=$4
+    second_line_num=$5
+
+    #Number of lines in database
+    total_lines=$(cat $dbname|wc -l)
+
+    #delete and output
+    sed -i ''$first_line_num','$second_line_num' d' $dbname
+    echo -e "Sucessfully deleted $first_line_num through $second_line_num from the database"
+  fi
+
+fi
+
+exit 0
